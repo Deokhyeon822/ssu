@@ -1,0 +1,261 @@
+<!-- HTML 바둑판 양식 출처 : https://zzarungna.com/1373-->
+<html>
+ <head>
+  <meta charset="UTF-8">
+  <title>DIV</title>
+  <style>
+    .main_title{
+        text-align: center;
+    }
+    
+    .main_list {
+        width: 800px;
+        height : 800px;
+        margin: 0 auto;
+    }
+    
+    .post_row {
+        text-align: center;
+        display:table;
+    }
+    
+    .post_cell {
+        display: table-cell;
+        width: 300px;
+        height: 330px;
+        border: 1px solid;
+        margin-bottom: 5px;
+    }
+    .img_board {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .paging_start{
+        text-align: center;
+    }
+    
+    div.post_cell{
+        font-size:8px;
+        line-height: 90%;
+    }
+    
+    div.desc{
+        width        : 100px;
+        text-overflow: ellipsis;  /* 위에 설정한 100px 보다 길면 말줄임표처럼 표시합니다. */
+        white-space  : nowrap;    /* 줄바꿈을 하지 않습니다. */
+        overflow     : hidden;    /* 내용이 길면 감춤니다 */
+    }
+    
+    div.hash_tag{
+        width        : 100px;
+        text-overflow: ellipsis;  /* 위에 설정한 100px 보다 길면 말줄임표처럼 표시합니다. */
+        white-space  : nowrap;    /* 줄바꿈을 하지 않습니다. */
+        overflow     : hidden;    /* 내용이 길면 감춤니다 */
+    }
+    
+    div.paging_number{
+        display : inline-block;
+    }
+    
+    div.img_selecter{
+        font-size: 15px ;
+        display : inline-block;
+    }
+    div.selecter{
+        display: inline-block;
+    }
+      </style>
+  <script>
+    var p0=1;
+    var p1=1;
+    var p2=1;
+    var p3=1;
+    var p4=1;
+    var p5=1;
+    var p6=1;
+    var p7=1;
+    var p8=1;
+    
+</script>
+ </head>
+ <body>
+     
+    <center>
+        <div>
+                      
+          <h2>검색 결과 <%= searchReq %></h2>
+          <% if (same) { %> <h3>(검색결과 정확히 일치).</h3> <% } %>
+        </div>
+
+ 	<!-- 리스트 불러오기  -->
+	<div class="main_list">
+		<!-- 상단 제목 -->
+		<div class="main_title">
+			<p>
+                <form action="/search" method="POST">
+                    <label for="searchInput">검색 기능 : </label>
+                    <select name="searchReq" >
+                        <option value="user_id">작성자</option>
+                        <option value="content">일반텍스트</option>
+                        <option value="hash_tag">Hash Tag</option>
+                      </select>
+                    <input type="text" name="searchInput" id="searchInput">
+                    <input type="submit" value="검색">
+                </form>
+            </p>
+		</div>
+		<!-- 리스트 -->
+        <% var postNum = 0 %>
+        <% var nowPost = postCnt < (nowPage*9)?postCnt%9:9%>
+        <%for(var k = 0; k < nowPost   ; k ++) {   %>
+            <% if(k%3 == 0) { %>
+                <div class="post_row">
+            <% } %>              
+                <div class="post_cell">
+                    <img class="img_board" id="post_<%=postNum%>_img" src="<%=postNum%>_1.jpg" >
+                    <div class="selecter">
+                        <div class="img_selecter" id = "post_<%=postNum%>_prev" onClick="loadPrevImg(<%=postNum%>, p<%=postNum%>)" >◀</div>
+                        <div class="img_selecter" id="selecter_post_<%=postNum%>" > ●○○○○</div>
+                        <div class="img_selecter" id = "post_<%=postNum%>_next" onClick="loadNextImg(<%=postNum%>, p<%=postNum%>)">▶</div>
+                    </div>
+                    <div class="writer_and_date"> <a onClick="searchSubmit('user_id',this.innerHTML)"><%= postInfo[postNum].user_id %></a> / <%= postInfo[postNum].posted_date %></div> <br>
+                    <div class="desc"><%= postInfo[postNum].content %></a></div>
+                    <div class="hash_tag"><a onClick="searchSubmit('user_id',this.innerHTML)"><%= postInfo[postNum].hash_tag %></a></div>
+                    <% postNum++ %>
+            <% if(k%3 == 2 || k == nowPost-1) { %> 
+                </div>
+            <% } %>       
+                		
+        </div>
+        <%  } %>
+        
+	<!-- 하단 리스트 번호 -->
+	<div class="paging_start">
+        <div>
+        <% var page = (postCnt % 9)==0?(postCnt/9):(postCnt/9)+1 %>
+		<% for(var i = 1; i < page ; i++) { %>
+            <div class="paging_number" onClick="pageChange(this.innerHTML)"><%= i %></div>
+        <% }%>
+        </div>
+    </div>
+	</div>
+	</div>
+</center>
+<script>
+    function searchSubmit(reqVal, inputVal){
+
+        inputVal = inputVal.replace('#','')
+        var newForm = document.createElement('form'); 
+        // set attribute (form)
+        newForm.name = 'newForm';
+        newForm.method = 'post';
+        newForm.action = '/search';
+        newForm.target = '_self';
+        // create element (input)
+        var input1 = document.createElement('input');
+        var input2 = document.createElement('input'); // set attribute (input)
+        var input3 = document.createElement('input');
+        input1.setAttribute("type", "hidden");
+        input1.setAttribute("name", "searchReq");
+        input1.setAttribute("value", reqVal);
+        input2.setAttribute("type", "hidden");
+        input2.setAttribute("name", "searchInput");
+        input2.setAttribute("value", inputVal); // append input (to form)
+        input3.setAttribute("type", "hidden");
+        input3.setAttribute("name", "same");
+        input3.setAttribute("value", 1); // append input (to form)
+        newForm.appendChild(input1);
+        newForm.appendChild(input2); // append form (to body)
+        newForm.appendChild(input3); // append form (to body)
+
+        document.body.appendChild(newForm); // submit form newForm.submit();
+        newForm.submit();
+    }
+
+    function pageChange(toPage){
+       
+        var newForm = document.createElement('form'); 
+        // set attribute (form)
+        newForm.name = 'newForm';
+        newForm.method = 'GET';
+        newForm.action = '/home';
+        newForm.target = '_self';
+        // create element (input)
+        var input1 = document.createElement('input');
+     
+        input1.setAttribute("type", "hidden");
+        input1.setAttribute("name", "toPage");
+        input1.setAttribute("value", toPage);
+        
+        newForm.appendChild(input1);
+       
+
+        document.body.appendChild(newForm); // submit form newForm.submit();
+        newForm.submit();
+    }
+
+    function loadNextImg(postNum,p){
+        console.log(p);
+        var img = document.getElementById("post_"+postNum+"_img");
+        img.src = postNum+"_"+ (++p)+".jpg";
+
+        var selecter = document.getElementById("selecter_post_"+postNum);
+
+        switch(p){
+            case 1 : selecter.innerHTML = "●○○○○";break;
+            case 2 : selecter.innerHTML = "○●○○○";break;
+            case 3 : selecter.innerHTML = "○○●○○";break;
+            case 4 : selecter.innerHTML = "○○○●○";break;
+            case 5 : selecter.innerHTML = "○○○○●";break;
+            default : break;
+        }
+        
+        switch(postNum){
+            case 0 : p0++;break;
+            case 1 : p1++;break;
+            case 2 : p2++;break;
+            case 3 : p3++;break;
+            case 5 : p5++;break;
+            case 6 : p6++;break;
+            case 7 : p7++;break;
+            case 8 : p8++;break;
+            case 4 : p4++;break;
+            default : break;
+        }
+
+        
+    }
+    function loadPrevImg(postNum,p){
+        console.log(p);
+        var img = document.getElementById("post_"+postNum+"_img");
+        img.src = postNum+"_"+ (--p)+".jpg";
+
+        var selecter = document.getElementById("selecter_post_"+postNum);
+
+        switch(p){
+            case 1 : selecter.innerHTML = "●○○○○";break;
+            case 2 : selecter.innerHTML = "○●○○○";break;
+            case 3 : selecter.innerHTML = "○○●○○";break;
+            case 4 : selecter.innerHTML = "○○○●○";break;
+            case 5 : selecter.innerHTML = "○○○○●";break;
+            default : break;
+        }
+        
+        switch(postNum){
+            case 0 : p0--;break;
+            case 1 : p1--;break;
+            case 2 : p2--;break;
+            case 3 : p3--;break;
+            case 5 : p5--;break;    
+            case 6 : p6--;break;
+            case 7 : p7--;break;
+            case 8 : p8--;break;
+            case 4 : p4--;break;
+            default : break;
+        }
+    }
+</script>
+ </body>
+</html>
